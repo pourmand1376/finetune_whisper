@@ -7,7 +7,7 @@ services:
     ports:
       - 8012:8888
     volumes:
-      - ./data:/home/user/app
+      - .:/home/user/app
     restart: unless-stopped
     deploy:
       resources:
