@@ -45,6 +45,6 @@ RUN pyenv install ${PYTHON_VERSION} && \
 COPY --chown=1000 ./requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
 
-COPY --chown=1000 . ${HOME}/app
+COPY --chown=1000 entrypoint.sh /tmp/entrypoint.sh
 
-CMD ["/home/user/app/entrypoint.sh"]
+CMD ["/tmp/entrypoint.sh"]
