@@ -47,4 +47,4 @@ RUN pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
 
 COPY --chown=1000 . ${HOME}/app
 
-CMD ["entrypoint.sh"]
+CMD ["./entrypoint.sh"]
