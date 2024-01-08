@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  app:
+    build: .
+    image: docker.mofid.dev/whisper-large-v3-finetune
+    ports:
+      - 8012:8888
+    volumes:
+      - .:/home/user/app
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0","1","2","3","4","5"]
+              capabilities: [gpu]
