@@ -8,6 +8,14 @@ services:
       - 8012:8888
     volumes:
       - ./data:/home/user/app
+    environment:
+      - GIT_PYTHON_REFRESH=quiet
+      - HUGGINGFACE_HUB_CACHE=/home/user/temp/.cache
+      - TRANSFORMERS_CACHE=/home/user/temp/.cache
+      - HF_HOME=/home/user/temp/.cache
+      - TORCH_HOME=/home/user/temp/torch
+      #- TRANSFORMERS_OFFLINE=1
+
     restart: unless-stopped
     deploy:
       resources:
