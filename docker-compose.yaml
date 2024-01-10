@@ -18,6 +18,7 @@ services:
       - HF_HOME=/home/user/temp/.cache
       - TORCH_HOME=/home/user/temp/torch
       #- TRANSFORMERS_OFFLINE=1
+    shm_size: '2gb'
     restart: unless-stopped
     deploy:
       resources:
