@@ -7,3 +7,4 @@ jiwer
 gradio
 transformers[torch]
 accelerate
+tensorboardX
