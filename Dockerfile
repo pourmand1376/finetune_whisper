@@ -22,7 +22,7 @@ RUN apt-get update && \
     libffi-dev \
     liblzma-dev \
     # gradio dependencies \
-    ffmpeg \
+    ffmpeg nano vim htop nodejs tmux \
     # fairseq2 dependencies \
     libsndfile-dev && \
     apt-get clean && \
@@ -33,6 +33,8 @@ USER user
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:${PATH}
 WORKDIR ${HOME}/app
+
+RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
 
 RUN curl https://pyenv.run | bash
 ENV PATH=${HOME}/.pyenv/shims:${HOME}/.pyenv/bin:${PATH}
