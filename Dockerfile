@@ -44,6 +44,8 @@ RUN pyenv install ${PYTHON_VERSION} && \
     pyenv rehash && \
     pip install --no-cache-dir -U pip setuptools wheel
 
+RUN pip install jupyterlab ipywidgets
+
 COPY --chown=1000 ./requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
 
