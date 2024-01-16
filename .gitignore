@@ -1,6 +1,7 @@
 Cache/
 data/common_voice_processed.hf
 v3/
+cv/
 whisper-large-medium-fa/
 *.bundle.*
 lib/
