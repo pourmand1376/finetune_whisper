@@ -1,3 +1,7 @@
+Cache/
+data/common_voice_processed.hf
+v3/
+whisper-large-medium-fa/
 *.bundle.*
 lib/
 node_modules/
