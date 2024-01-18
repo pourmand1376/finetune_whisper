@@ -8,3 +8,4 @@ gradio
 transformers[torch]
 accelerate
 tensorboardX
+mlflow
