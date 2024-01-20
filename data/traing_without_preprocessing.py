@@ -25,6 +25,7 @@ kyc= load_dataset('dataset/whisper_processed_data/kyc-processed.hf',
 combined_data = DatasetDict()
 combined_data['train']=concatenate_datasets([kyc['train'], common_voice['train'], crm['train']])
 combined_data['test']=concatenate_datasets([kyc['test'], common_voice['test'], crm['test']])
+
 # In[3]:
 
 
@@ -132,12 +133,12 @@ from transformers import Seq2SeqTrainingArguments
 
 training_args = Seq2SeqTrainingArguments(
     output_dir="./whisper-large-medium-fa",  # change to a repo name of your choice
-    per_device_train_batch_size=16,
+    per_device_train_batch_size=24,
     gradient_accumulation_steps=1,  # increase by 2x for every 2x decrease in batch size
     learning_rate=1e-5,
     warmup_ratio=0.1,
     #warmup_steps=500,
-    num_train_epochs=1.0,
+    num_train_epochs=5.0,
     #max_steps=4000,
     gradient_checkpointing=True,
     fp16=True,
@@ -145,8 +146,8 @@ training_args = Seq2SeqTrainingArguments(
     per_device_eval_batch_size=8,
     predict_with_generate=True,
     generation_max_length=225,
-    save_steps=1000,
-    eval_steps=1,
+    save_steps=2000,
+    eval_steps=2000,
     logging_steps=25,
     report_to="all",
     load_best_model_at_end=True,
