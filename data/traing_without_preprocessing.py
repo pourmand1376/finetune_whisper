@@ -3,7 +3,7 @@
 
 # In[1]:
 
-
+from datasets import concatenate_datasets
 from datasets import load_dataset, DatasetDict
 from accelerate import Accelerator
 import mlflow
@@ -13,14 +13,22 @@ mlflow.set_tracking_uri('http://10.1.20.6:5555')
 mlflow.set_experiment('ASR Whisper')
 mlflow.transformers.autolog()
 mlflow.autolog()
+mlflow.pytorch.autolog()
 
-common_voice=load_dataset('common_voice_processed.hf')
+common_voice=load_dataset('dataset/whisper_processed_data/common_voice_processed.hf',
+                         cache_dir='dataset/whisper_processed_data/.cache')
+crm = load_dataset('dataset/whisper_processed_data/crm-processed.hf',
+                  cache_dir='dataset/whisper_processed_data/.cache')
+kyc= load_dataset('dataset/whisper_processed_data/kyc-processed.hf',
+                 cache_dir='dataset/whisper_processed_data/.cache')
 
-
+combined_data = DatasetDict()
+combined_data['train']=concatenate_datasets([kyc['train'], common_voice['train'], crm['train']])
+combined_data['test']=concatenate_datasets([kyc['test'], common_voice['test'], crm['test']])
 # In[3]:
 
 
-common_voice
+combined_data
 
 
 # In[4]:
@@ -68,7 +76,13 @@ processor = WhisperProcessor.from_pretrained("openai/whisper-medium", language="
 
 data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
 
+from transformers import WhisperFeatureExtractor
 
+feature_extractor = WhisperFeatureExtractor.from_pretrained("openai/whisper-medium",cache_dir='v3')
+
+from transformers import WhisperTokenizer
+
+tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-medium", language="Persian", task="transcribe",cache_dir='v3')
 # In[6]:
 
 
@@ -132,9 +146,9 @@ training_args = Seq2SeqTrainingArguments(
     predict_with_generate=True,
     generation_max_length=225,
     save_steps=1000,
-    eval_steps=1000,
+    eval_steps=1,
     logging_steps=25,
-    report_to=["tensorboard"],
+    report_to="all",
     load_best_model_at_end=True,
     metric_for_best_model="wer",
     greater_is_better=False,
@@ -150,8 +164,8 @@ from transformers import Seq2SeqTrainer
 trainer = Seq2SeqTrainer(
     args=training_args,
     model=model,
-    train_dataset=common_voice["train"],
-    eval_dataset=common_voice["test"],
+    train_dataset=combined_data["train"],
+    eval_dataset=combined_data["test"],
     data_collator=data_collator,
     compute_metrics=compute_metrics,
     tokenizer=processor.feature_extractor,

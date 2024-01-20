@@ -10,6 +10,7 @@ services:
       - ./data:/home/user/app
       - ./Cache/:/home/user/temp/torch
       - ./Cache/:/home/user/temp/.cache
+      - /CORE/data/ASR_CleanDataset:/home/user/app/dataset
 
     environment:
       - GIT_PYTHON_REFRESH=quiet
