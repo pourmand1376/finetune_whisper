@@ -106,6 +106,7 @@ def compute_metrics(pred):
     pred_str = tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
     label_str = tokenizer.batch_decode(label_ids, skip_special_tokens=True)
 
+    
     wer = 100 * metric.compute(predictions=pred_str, references=label_str)
 
     return {"wer": wer}
@@ -174,16 +175,31 @@ trainer = Seq2SeqTrainer(
 
 
 # In[ ]:
-accelerator = Accelerator(log_with="mlflow")
+# accelerator = Accelerator(log_with="mlflow")
 
-if accelerator.is_main_process:
-    accelerator.init_trackers(
-        "ASR Whisper"
-    )
+# if accelerator.is_main_process:
+#     accelerator.init_trackers(
+#         "ASR Whisper"
+#     )
 
-my_trainer=accelerator.prepare(trainer)
+# my_trainer=accelerator.prepare(trainer)
 
-my_trainer.train()
+# my_trainer.train()
+
+with mlflow.start_run():
+    trainer.train()
+#trainer.train(resume_from_checkpoint=True)
+
+import os
+from datetime import datetime
+
+# Get the current date and time
+current_time = datetime.now()
+
+# Format the date and time as a string (optional, you can customize the format)
+formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+
+trainer.save_model(f'whisper_best_{formatted_time}')
 
 
 # In[ ]:
