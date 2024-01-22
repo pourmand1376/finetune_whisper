@@ -29,7 +29,7 @@ combined_data['test']=concatenate_datasets([kyc['test'], common_voice['test'], c
 # In[3]:
 
 
-combined_data
+#combined_data=crm
 
 
 # In[4]:
@@ -93,9 +93,12 @@ metric = evaluate.load("wer")
 
 
 # In[7]:
+import json
+from pathlib import Path
 
 
 def compute_metrics(pred):
+
     pred_ids = pred.predictions
     label_ids = pred.label_ids
 
@@ -106,6 +109,14 @@ def compute_metrics(pred):
     pred_str = tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
     label_str = tokenizer.batch_decode(label_ids, skip_special_tokens=True)
 
+    Path('prediction.txt').write_text(str(pred_str))
+    Path('labels.txt').write_text(str(label_str))
+
+    Path('prediction.json').write_text(json.dumps(pred_str,ensure_ascii=False))
+    Path('labels.json').write_text(json.dumps(label_str, ensure_ascii=False))
+
+    # this is because some labels are empty
+    label_str = [item if(len(item.strip())>0) else '.' for item in label_str]
     
     wer = 100 * metric.compute(predictions=pred_str, references=label_str)
 
@@ -125,6 +136,7 @@ model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium",
 
 model.config.forced_decoder_ids = None
 model.config.suppress_tokens = []
+model.config.use_cache = False
 
 
 # In[10]:
@@ -139,8 +151,8 @@ training_args = Seq2SeqTrainingArguments(
     learning_rate=1e-5,
     warmup_ratio=0.1,
     #warmup_steps=500,
-    num_train_epochs=5.0,
-    #max_steps=4000,
+    #num_train_epochs=5.0,
+    max_steps=1,
     gradient_checkpointing=True,
     fp16=True,
     evaluation_strategy="steps",
@@ -148,7 +160,7 @@ training_args = Seq2SeqTrainingArguments(
     predict_with_generate=True,
     generation_max_length=225,
     save_steps=2000,
-    eval_steps=2000,
+    eval_steps=1,
     logging_steps=25,
     report_to="all",
     load_best_model_at_end=True,
@@ -168,6 +180,16 @@ trainer = Seq2SeqTrainer(
     model=model,
     train_dataset=combined_data["train"],
     eval_dataset=combined_data["test"],
+    #eval_dataset=combined_data["test"].select(range(0,40000)),
+    #eval_dataset=combined_data["test"].select(range(0,20000)),
+    #eval_dataset=combined_data["test"].select(range(0,10000)),
+    #eval_dataset=combined_data["test"].select(range(0,5000)), good
+    #eval_dataset=combined_data["test"].select(range(5000,10000)), #bad,
+    #eval_dataset=combined_data["test"].select(range(5000,7500)), #bad
+    #eval_dataset=combined_data["test"].select(range(5000,6250)), good
+    #eval_dataset=combined_data["test"].select(range(6250,7000)), good
+   # eval_dataset=combined_data["test"].select(range(7000,7250)), good
+    #eval_dataset=combined_data["test"].select(range(7250,7500)), #good
     data_collator=data_collator,
     compute_metrics=compute_metrics,
     tokenizer=processor.feature_extractor,
@@ -186,8 +208,8 @@ trainer = Seq2SeqTrainer(
 
 # my_trainer.train()
 
-with mlflow.start_run():
-    trainer.train()
+trainer.train()
+
 #trainer.train(resume_from_checkpoint=True)
 
 import os
