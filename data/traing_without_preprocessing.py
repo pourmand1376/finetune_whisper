@@ -17,7 +17,7 @@ mlflow.pytorch.autolog()
 
 common_voice=load_dataset('dataset/whisper_processed_data/common_voice_processed.hf',
                          cache_dir='dataset/whisper_processed_data/.cache')
-crm = load_dataset('dataset/whisper_processed_data/crm-processed.hf',
+crm = load_dataset('dataset/whisper_processed_data/crm_16khz-processed.hf',
                   cache_dir='dataset/whisper_processed_data/.cache')
 kyc= load_dataset('dataset/whisper_processed_data/kyc-processed.hf',
                  cache_dir='dataset/whisper_processed_data/.cache')
@@ -116,7 +116,7 @@ def compute_metrics(pred):
     Path('labels.json').write_text(json.dumps(label_str, ensure_ascii=False))
 
     # this is because some labels are empty
-    label_str = [item if(len(item.strip())>0) else '.' for item in label_str]
+    #label_str = [item if(len(item.strip())>0) else '.' for item in label_str]
     
     wer = 100 * metric.compute(predictions=pred_str, references=label_str)
 
@@ -132,7 +132,8 @@ model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium",
 
 
 # In[9]:
-
+from functools import partial
+model.generate = partial(model.generate, language="Persian", task="transcribe")
 
 model.config.forced_decoder_ids = None
 model.config.suppress_tokens = []
@@ -145,22 +146,22 @@ model.config.use_cache = False
 from transformers import Seq2SeqTrainingArguments
 
 training_args = Seq2SeqTrainingArguments(
-    output_dir="./whisper-large-medium-fa",  # change to a repo name of your choice
-    per_device_train_batch_size=24,
+    output_dir="./train_with_generate_only_persian_common_voice",  # change to a repo name of your choice
+    per_device_train_batch_size=16,
     gradient_accumulation_steps=1,  # increase by 2x for every 2x decrease in batch size
     learning_rate=1e-5,
     warmup_ratio=0.1,
     #warmup_steps=500,
-    #num_train_epochs=5.0,
-    max_steps=1,
+    num_train_epochs=3.0,
+    #max_steps=1,
     gradient_checkpointing=True,
     fp16=True,
     evaluation_strategy="steps",
     per_device_eval_batch_size=8,
     predict_with_generate=True,
     generation_max_length=225,
-    save_steps=2000,
-    eval_steps=1,
+    save_steps=4000,
+    eval_steps=4000,
     logging_steps=25,
     report_to="all",
     load_best_model_at_end=True,
