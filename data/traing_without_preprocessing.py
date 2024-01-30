@@ -128,8 +128,10 @@ def compute_metrics(pred):
 
 from transformers import WhisperForConditionalGeneration
 
-model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium",cache_dir='v3')
-
+# new training from scratch
+#model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium",cache_dir='v3')
+# resume training
+model = WhisperForConditionalGeneration.from_pretrained("train_with_generate_only_persian_common_voice/checkpoint-16000",cache_dir='v3')
 
 # In[9]:
 from functools import partial
@@ -146,7 +148,7 @@ model.config.use_cache = False
 from transformers import Seq2SeqTrainingArguments
 
 training_args = Seq2SeqTrainingArguments(
-    output_dir="./train_with_generate_only_persian_common_voice",  # change to a repo name of your choice
+    output_dir="./train_with_full_data",  # change to a repo name of your choice
     per_device_train_batch_size=16,
     gradient_accumulation_steps=1,  # increase by 2x for every 2x decrease in batch size
     learning_rate=1e-5,
@@ -160,8 +162,8 @@ training_args = Seq2SeqTrainingArguments(
     per_device_eval_batch_size=8,
     predict_with_generate=True,
     generation_max_length=225,
-    save_steps=4000,
-    eval_steps=4000,
+    save_steps=8000,
+    eval_steps=8000,
     logging_steps=25,
     report_to="all",
     load_best_model_at_end=True,
@@ -213,16 +215,16 @@ trainer.train()
 
 #trainer.train(resume_from_checkpoint=True)
 
-import os
-from datetime import datetime
+#import os
+#from datetime import datetime
 
 # Get the current date and time
-current_time = datetime.now()
+#current_time = datetime.now()
 
 # Format the date and time as a string (optional, you can customize the format)
-formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+#formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-trainer.save_model(f'whisper_best_{formatted_time}')
+#trainer.save_model(f'whisper_best_{formatted_time}')
 
 
 # In[ ]:
